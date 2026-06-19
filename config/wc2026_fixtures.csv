@@ -1,5 +1,5 @@
 match_id,home_team,away_team,competition,venue_name,city,country,latitude,longitude,altitude_m,kickoff_utc,kickoff_local
-wc2026-ned-swe,Netherlands,Sweden,FIFA World Cup,TBD,TBD,USA,,,,,
+wc2026-ned-swe,Netherlands,Sweden,FIFA World Cup,TBD,TBD,USA,,,,2026-06-20T17:00:00Z,
 wc2026-host-001,TBD,TBD,FIFA World Cup,MetLife Stadium,East Rutherford,USA,40.8128,-74.0742,3,,
 wc2026-host-002,TBD,TBD,FIFA World Cup,SoFi Stadium,Inglewood,USA,33.9535,-118.3392,37,,
 wc2026-host-003,TBD,TBD,FIFA World Cup,AT&T Stadium,Arlington,USA,32.7473,-97.0945,184,,

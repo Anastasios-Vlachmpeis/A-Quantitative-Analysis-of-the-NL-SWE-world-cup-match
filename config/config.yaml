@@ -15,7 +15,7 @@ target_match:
   away: "Sweden"
   competition: "FIFA World Cup"
   season: 2026
-  kickoff_utc: null     # FILL IN once known (ISO 8601, e.g. "2026-06-2xT..Z").
+  kickoff_utc: "2026-06-20T17:00:00Z"   # 18:00 BST (UTC+1) Sat 2026-06-20.
                         # Used as the as_of for live features + closing-line cutoff.
 
 # ---------------------------------------------------------------------------
