@@ -5,7 +5,7 @@
 # =============================================================================
 
 seed: 20260619          # global seed (python/numpy/pymc). See repro.set_seeds.
-scope: history          # "history" (walk-forward backtest) | "live" (the match)
+scope: live          # "history" (walk-forward backtest) | "live" (the match)
 
 # ---------------------------------------------------------------------------
 # The match we are predicting (scope=live applies the pipeline here once)
