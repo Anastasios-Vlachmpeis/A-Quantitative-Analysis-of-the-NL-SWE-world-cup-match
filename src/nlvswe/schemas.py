@@ -182,9 +182,23 @@ PREDICTIONS_SCHEMA = pa.DataFrameSchema(
         "p_away": pa.Column(float, Check.in_range(0.0, 1.0), nullable=False),
         "outcome": pa.Column(str, Check.isin(["home", "draw", "away"]), nullable=False),
         "has_scoreline": pa.Column(bool, nullable=False),
+        "scoreline_flat": pa.Column(object, nullable=True, required=False),
     },
     strict=True,
     name="predictions",
+)
+
+MARKET_PROBS_SCHEMA = pa.DataFrameSchema(
+    {
+        "match_id": pa.Column(str, nullable=False),
+        "model": pa.Column(str, nullable=False),
+        "market": pa.Column(str, nullable=False),
+        "selection": pa.Column(str, nullable=False),
+        "model_prob": pa.Column(float, Check.in_range(0.0, 1.0), nullable=False),
+        "method": pa.Column(str, Check.isin(["analytic", "mc", "derived"]), nullable=False),
+    },
+    strict=True,
+    name="market_probs",
 )
 
 EVAL_SCORES_SCHEMA = pa.DataFrameSchema(
@@ -210,6 +224,7 @@ CANONICAL_SCHEMAS: dict[str, pa.DataFrameSchema] = {
     "conditions": CONDITIONS_SCHEMA,
     "features": FEATURES_SCHEMA,
     "predictions": PREDICTIONS_SCHEMA,
+    "market_probs": MARKET_PROBS_SCHEMA,
     "eval_scores": EVAL_SCORES_SCHEMA,
 }
 

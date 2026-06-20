@@ -96,6 +96,18 @@ pytest tests/test_models.py
 
 See `models/MODELS.md` for assumptions and limitations. Outputs: `data/processed/predictions_<model>.parquet`.
 
+## Probability induction (Plan 07)
+
+Turn scoreline distributions into betting market probabilities:
+
+```bash
+python -m nlvswe.betting.induction --model poisson
+python -m nlvswe.betting.induction --model all
+pytest tests/test_induction.py
+```
+
+Outputs: `data/processed/market_probs_<model>.parquet`, `reports/figures/induction_*`.
+
 ## Layout
 
 ```

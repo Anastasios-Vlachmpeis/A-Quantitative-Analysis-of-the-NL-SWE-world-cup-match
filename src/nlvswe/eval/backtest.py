@@ -26,7 +26,7 @@ CvWindow = Literal["expanding", "rolling"]
 
 
 def prediction_to_row(pred: MatchPrediction, *, model: str, match: pd.Series) -> dict:
-    return {
+    row = {
         "match_id": pred.match_id,
         "model": model,
         "date_utc": pd.Timestamp(match["date_utc"]).tz_convert("UTC"),
@@ -36,6 +36,9 @@ def prediction_to_row(pred: MatchPrediction, *, model: str, match: pd.Series) ->
         "outcome": match.get("result_1x2"),
         "has_scoreline": pred.scoreline is not None,
     }
+    if pred.scoreline is not None:
+        row["scoreline_flat"] = pred.scoreline.ravel().tolist()
+    return row
 
 
 def walk_forward_backtest(
