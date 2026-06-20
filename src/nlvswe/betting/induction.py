@@ -389,8 +389,11 @@ def _scoreline_for_target(model_name: str, cfg: AppConfig, features: pd.DataFram
 def plot_target_scoreline_heatmap(matrix: np.ndarray, *, model: str) -> None:
     apply_theme()
     mat = np.asarray(matrix, dtype=float)
+    # Display 0..7 goals/side; higher cells carry ~0 mass and just add whitespace.
+    view = min(7, mat.shape[0] - 1)
+    sub = mat[: view + 1, : view + 1]
     fig, ax = plt.subplots(figsize=(8, 6))
-    sns.heatmap(mat, annot=False, cmap="Blues", ax=ax, cbar_kws={"label": "P(score)"})
+    sns.heatmap(sub, annot=False, cmap="Blues", ax=ax, cbar_kws={"label": "P(score)"})
     ax.set_xlabel("Away goals")
     ax.set_ylabel("Home goals")
     ax.set_title(f"Scoreline distribution — {model} (target match)")
@@ -402,14 +405,25 @@ def plot_target_scoreline_heatmap(matrix: np.ndarray, *, model: str) -> None:
 
 def plot_simulated_scores(samples: np.ndarray, *, model: str) -> None:
     apply_theme()
-    totals = samples[:, 0] + samples[:, 1]
+    home, away = samples[:, 0], samples[:, 1]
+    totals = home + away
+    gd = home - away
     fig, axes = plt.subplots(1, 2, figsize=(10, 4))
-    axes[0].hist(totals, bins=range(0, int(totals.max()) + 2), color="#00B0FF", edgecolor="#1E293B")
+
+    # Total goals: bars centered on integers (so the mode reads at its true value).
+    t_max = int(totals.max())
+    axes[0].hist(totals, bins=np.arange(-0.5, t_max + 1.5, 1.0), color="#00B0FF", edgecolor="#1E293B")
     axes[0].set_title("Simulated total goals")
     axes[0].set_xlabel("Total goals")
-    axes[1].hist(samples[:, 0] - samples[:, 1], bins=20, color="#00E676", edgecolor="#1E293B")
-    axes[1].set_title("Simulated goal difference (home - away)")
-    axes[1].set_xlabel("GD")
+    axes[0].set_xticks(range(0, t_max + 1))
+
+    # Goal difference is an integer — integer-aligned bins + integer ticks (no 2.5).
+    g_lo, g_hi = int(gd.min()), int(gd.max())
+    axes[1].hist(gd, bins=np.arange(g_lo - 0.5, g_hi + 1.5, 1.0), color="#00E676", edgecolor="#1E293B")
+    axes[1].set_title("Simulated goal difference (home − away)")
+    axes[1].set_xlabel("Goal difference (home − away)")
+    axes[1].set_xticks(range(g_lo, g_hi + 1))
+
     fig.suptitle(f"Monte Carlo score simulation — {model}")
     style_figure(fig)
     for ax in axes:
