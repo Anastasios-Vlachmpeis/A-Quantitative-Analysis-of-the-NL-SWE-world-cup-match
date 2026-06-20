@@ -52,6 +52,34 @@ SCORERS = {
     "brier": brier_1x2,
 }
 
+_OUTCOME_CODES = {"home": 0, "draw": 1, "away": 2}
+
+
+def outcome_codes(outcomes: pd.Series | np.ndarray) -> np.ndarray:
+    """Map outcome labels to 0=home, 1=draw, 2=away."""
+    return np.array([_OUTCOME_CODES[str(o)] for o in outcomes], dtype=int)
+
+
+def vectorized_per_match_scores(
+    probs: np.ndarray,
+    outcome_idx: np.ndarray,
+    metric: str,
+) -> np.ndarray:
+    """Vectorized per-match scores; probs shape (n, 3)."""
+    if metric == "rps":
+        cdf_pred = np.cumsum(probs, axis=1)[:, :-1]
+        k = np.arange(cdf_pred.shape[1])
+        cdf_obs = (outcome_idx[:, None] <= k[None, :]).astype(float)
+        return np.mean((cdf_pred - cdf_obs) ** 2, axis=1)
+    if metric == "log_loss":
+        chosen = probs[np.arange(len(outcome_idx)), outcome_idx]
+        return -np.log(np.maximum(chosen, 1e-15))
+    if metric == "brier":
+        y = np.zeros_like(probs)
+        y[np.arange(len(outcome_idx)), outcome_idx] = 1.0
+        return np.sum((probs - y) ** 2, axis=1)
+    raise ValueError(f"unknown metric {metric!r}")
+
 
 @dataclass(frozen=True)
 class ScoreSummary:
@@ -66,12 +94,11 @@ def _per_match_scores(
     preds: pd.DataFrame,
     metric: str,
 ) -> np.ndarray:
-    scorer = SCORERS[metric]
-    values: list[float] = []
-    for _, row in preds.iterrows():
-        probs = {"home": row["p_home"], "draw": row["p_draw"], "away": row["p_away"]}
-        values.append(scorer(probs, str(row["outcome"])))
-    return np.asarray(values, dtype=float)
+    if preds.empty:
+        return np.asarray([], dtype=float)
+    probs = preds[["p_home", "p_draw", "p_away"]].to_numpy(dtype=float)
+    outcome_idx = outcome_codes(preds["outcome"])
+    return vectorized_per_match_scores(probs, outcome_idx, metric)
 
 
 def bootstrap_ci(

@@ -214,6 +214,36 @@ EVAL_SCORES_SCHEMA = pa.DataFrameSchema(
     name="eval_scores",
 )
 
+LEADERBOARD_SCHEMA = pa.DataFrameSchema(
+    {
+        "model": pa.Column(str, nullable=False),
+        "metric": pa.Column(str, Check.isin(["rps", "log_loss", "brier"]), nullable=False),
+        "mean": pa.Column(float, nullable=False),
+        "ci_low": pa.Column(float, nullable=False),
+        "ci_high": pa.Column(float, nullable=False),
+        "n": pa.Column("Int64", Check.ge(1), nullable=False),
+        "accuracy": pa.Column(float, Check.in_range(0.0, 1.0), nullable=True, required=False),
+        "rank": pa.Column("Int64", Check.ge(1), nullable=True, required=False),
+    },
+    strict=True,
+    name="leaderboard",
+)
+
+PAIRWISE_SCHEMA = pa.DataFrameSchema(
+    {
+        "model": pa.Column(str, nullable=False),
+        "reference": pa.Column(str, nullable=False),
+        "metric": pa.Column(str, Check.isin(["rps", "log_loss", "brier"]), nullable=False),
+        "mean_diff": pa.Column(float, nullable=False),
+        "ci_low": pa.Column(float, nullable=False),
+        "ci_high": pa.Column(float, nullable=False),
+        "n": pa.Column("Int64", Check.ge(1), nullable=False),
+        "beats_reference": pa.Column(bool, nullable=False),
+    },
+    strict=True,
+    name="pairwise_vs_market",
+)
+
 CANONICAL_SCHEMAS: dict[str, pa.DataFrameSchema] = {
     "teams": TEAMS_SCHEMA,
     "venues": VENUES_SCHEMA,
@@ -226,6 +256,8 @@ CANONICAL_SCHEMAS: dict[str, pa.DataFrameSchema] = {
     "predictions": PREDICTIONS_SCHEMA,
     "market_probs": MARKET_PROBS_SCHEMA,
     "eval_scores": EVAL_SCORES_SCHEMA,
+    "leaderboard": LEADERBOARD_SCHEMA,
+    "pairwise_vs_market": PAIRWISE_SCHEMA,
 }
 
 for _name, _schema in CANONICAL_SCHEMAS.items():

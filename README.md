@@ -23,7 +23,7 @@ python -m venv .venv
 pip install -e .
 ```
 
-## Quick check (Plan 01)
+## Quick check
 
 ```bash
 python -m nlvswe._dummy
@@ -33,7 +33,7 @@ pytest tests/test_foundation.py
 The dummy run writes `data/processed/dummy.parquet` and a manifest sidecar,
 proving the artifact pipeline works.
 
-## Data acquisition (Plan 02)
+## Data acquisition
 
 Pull raw sources into `data/raw/` (gitignored). Each file gets a manifest sidecar.
 
@@ -51,7 +51,7 @@ pytest tests/test_acquire.py
 
 See `data/raw/SOURCES.md` for coverage notes from the validation spike.
 
-## Cleaning (Plan 03)
+## Cleaning
 
 Build canonical interim tables from raw data:
 
@@ -62,7 +62,7 @@ pytest tests/test_clean.py
 
 Outputs land in `data/interim/` with manifests; see `data/interim/VALIDATION.md`.
 
-## Feature engineering (Plan 04)
+## Feature engineering
 
 Build point-in-time, leakage-safe features for international matches:
 
@@ -73,7 +73,7 @@ pytest tests/test_features.py
 
 Outputs: `data/processed/features.parquet`, `data/processed/FEATURES.md`, `reports/figures/eda_feat_*`.
 
-## Evaluation harness (Plan 05)
+## Evaluation harness
 
 Shared scoring, calibration, walk-forward CV, and market benchmark:
 
@@ -84,7 +84,7 @@ pytest tests/test_eval.py
 
 Outputs: `data/processed/predictions_<model>.parquet`, `data/processed/eval_scores.parquet`, `reports/figures/calibration_*.png`.
 
-## Models (Plan 06)
+## Models
 
 International-only model ladder with walk-forward backtest:
 
@@ -96,7 +96,7 @@ pytest tests/test_models.py
 
 See `models/MODELS.md` for assumptions and limitations. Outputs: `data/processed/predictions_<model>.parquet`.
 
-## Probability induction (Plan 07)
+## Probability induction
 
 Turn scoreline distributions into betting market probabilities:
 
@@ -107,6 +107,17 @@ pytest tests/test_induction.py
 ```
 
 Outputs: `data/processed/market_probs_<model>.parquet`, `reports/figures/induction_*`.
+
+## Model comparison
+
+Compare all models on a common walk-forward match set, build ensembles, and record selection:
+
+```bash
+python -m nlvswe.eval.compare
+pytest tests/test_compare.py
+```
+
+Outputs: `data/processed/leaderboard.parquet`, `data/processed/predictions_ensemble_*.parquet`, `reports/MODEL_SELECTION.md`, `reports/figures/compare_*`.
 
 ## Layout
 

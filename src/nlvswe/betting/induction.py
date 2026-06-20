@@ -28,6 +28,12 @@ PROCESSED = "processed"
 INTERIM = "interim"
 Method = Literal["analytic", "mc", "derived"]
 
+# Shared induction figure axes — keep Poisson / Dixon-Coles plots comparable.
+_SCORELINE_GOALS_MAX = 7
+_SIM_TOTAL_GOALS_MAX = 11
+_SIM_GD_MIN = -6
+_SIM_GD_MAX = 10
+
 
 @dataclass(frozen=True)
 class MarketConfig:
@@ -390,10 +396,14 @@ def plot_target_scoreline_heatmap(matrix: np.ndarray, *, model: str) -> None:
     apply_theme()
     mat = np.asarray(matrix, dtype=float)
     # Display 0..7 goals/side; higher cells carry ~0 mass and just add whitespace.
-    view = min(7, mat.shape[0] - 1)
-    sub = mat[: view + 1, : view + 1]
+    side = _SCORELINE_GOALS_MAX + 1
+    sub = mat[:side, :side]
     fig, ax = plt.subplots(figsize=(8, 6))
     sns.heatmap(sub, annot=False, cmap="Blues", ax=ax, cbar_kws={"label": "P(score)"})
+    ax.set_xticks(np.arange(side) + 0.5)
+    ax.set_xticklabels(range(side))
+    ax.set_yticks(np.arange(side) + 0.5)
+    ax.set_yticklabels(range(side))
     ax.set_xlabel("Away goals")
     ax.set_ylabel("Home goals")
     ax.set_title(f"Scoreline distribution — {model} (target match)")
@@ -411,18 +421,28 @@ def plot_simulated_scores(samples: np.ndarray, *, model: str) -> None:
     fig, axes = plt.subplots(1, 2, figsize=(10, 4))
 
     # Total goals: bars centered on integers (so the mode reads at its true value).
-    t_max = int(totals.max())
-    axes[0].hist(totals, bins=np.arange(-0.5, t_max + 1.5, 1.0), color="#00B0FF", edgecolor="#1E293B")
+    axes[0].hist(
+        totals,
+        bins=np.arange(-0.5, _SIM_TOTAL_GOALS_MAX + 1.5, 1.0),
+        color="#00B0FF",
+        edgecolor="#1E293B",
+    )
     axes[0].set_title("Simulated total goals")
     axes[0].set_xlabel("Total goals")
-    axes[0].set_xticks(range(0, t_max + 1))
+    axes[0].set_xlim(-0.5, _SIM_TOTAL_GOALS_MAX + 0.5)
+    axes[0].set_xticks(range(0, _SIM_TOTAL_GOALS_MAX + 1))
 
     # Goal difference is an integer — integer-aligned bins + integer ticks (no 2.5).
-    g_lo, g_hi = int(gd.min()), int(gd.max())
-    axes[1].hist(gd, bins=np.arange(g_lo - 0.5, g_hi + 1.5, 1.0), color="#00E676", edgecolor="#1E293B")
+    axes[1].hist(
+        gd,
+        bins=np.arange(_SIM_GD_MIN - 0.5, _SIM_GD_MAX + 1.5, 1.0),
+        color="#00E676",
+        edgecolor="#1E293B",
+    )
     axes[1].set_title("Simulated goal difference (home − away)")
     axes[1].set_xlabel("Goal difference (home − away)")
-    axes[1].set_xticks(range(g_lo, g_hi + 1))
+    axes[1].set_xlim(_SIM_GD_MIN - 0.5, _SIM_GD_MAX + 0.5)
+    axes[1].set_xticks(range(_SIM_GD_MIN, _SIM_GD_MAX + 1))
 
     fig.suptitle(f"Monte Carlo score simulation — {model}")
     style_figure(fig)
