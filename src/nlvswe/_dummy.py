@@ -1,4 +1,4 @@
-"""Dummy phase: proves config -> io -> manifest pipeline end-to-end."""
+"""Smoke test that config, parquet IO, and manifests actually work."""
 
 from __future__ import annotations
 

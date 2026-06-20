@@ -1,4 +1,4 @@
-"""Betting strategy tests."""
+"""+EV backtest, Kelly sizing, and CLV tests."""
 
 from __future__ import annotations
 

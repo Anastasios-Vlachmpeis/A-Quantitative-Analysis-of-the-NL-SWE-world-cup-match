@@ -1,4 +1,4 @@
-"""Bankroll simulation and Monte Carlo risk analysis."""
+"""Monte Carlo bankroll paths and ROI confidence intervals."""
 
 from __future__ import annotations
 
@@ -106,7 +106,7 @@ def monte_carlo_bankroll(
         "risk_of_ruin": float(ruined.mean()),
     }
 
-    # Store a sample of terminal bankrolls for plotting (not full paths — too large)
+    # Terminal bankrolls only (plotting every MC path would be silly).
     sample_idx = np.linspace(0, n_sims - 1, num=min(500, n_sims), dtype=int)
     rows = [
         {

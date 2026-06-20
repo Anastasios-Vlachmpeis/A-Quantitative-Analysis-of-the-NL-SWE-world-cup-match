@@ -1,4 +1,4 @@
-"""Evaluation harness (Plan 05)."""
+"""Walk-forward scoring, calibration checks, and the market benchmark."""
 
 from nlvswe.eval.calibration import expected_calibration_error, plot_reliability, reliability_curve
 from nlvswe.eval.market import MarketModel, devig

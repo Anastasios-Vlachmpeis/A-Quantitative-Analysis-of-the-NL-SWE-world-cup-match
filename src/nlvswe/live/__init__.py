@@ -1,1 +1,1 @@
-"""Live match prediction and pre-match freeze."""
+"""Pre-match live pipeline entrypoint."""

@@ -1,4 +1,4 @@
-"""Scoreline-to-market probability induction (Plan 07)."""
+"""Turn scoreline matrices into prices for totals, BTTS, handicaps, and the rest."""
 
 from __future__ import annotations
 
@@ -28,7 +28,7 @@ PROCESSED = "processed"
 INTERIM = "interim"
 Method = Literal["analytic", "mc", "derived"]
 
-# Shared induction figure axes — keep Poisson / Dixon-Coles plots comparable.
+# Axis limits shared across induction plots so Poisson and Dixon-Coles line up.
 _SCORELINE_GOALS_MAX = 7
 _SIM_TOTAL_GOALS_MAX = 11
 _SIM_GD_MIN = -6
@@ -395,7 +395,7 @@ def _scoreline_for_target(model_name: str, cfg: AppConfig, features: pd.DataFram
 def plot_target_scoreline_heatmap(matrix: np.ndarray, *, model: str) -> None:
     apply_theme()
     mat = np.asarray(matrix, dtype=float)
-    # Display 0..7 goals/side; higher cells carry ~0 mass and just add whitespace.
+    # Display 0..7 goals per side; tail mass above that is negligible anyway.
     side = _SCORELINE_GOALS_MAX + 1
     sub = mat[:side, :side]
     fig, ax = plt.subplots(figsize=(8, 6))
@@ -420,7 +420,7 @@ def plot_simulated_scores(samples: np.ndarray, *, model: str) -> None:
     gd = home - away
     fig, axes = plt.subplots(1, 2, figsize=(10, 4))
 
-    # Total goals: bars centered on integers (so the mode reads at its true value).
+    # Total goals: integer-centered bins so the mode sits on its true value.
     axes[0].hist(
         totals,
         bins=np.arange(-0.5, _SIM_TOTAL_GOALS_MAX + 1.5, 1.0),
@@ -432,7 +432,7 @@ def plot_simulated_scores(samples: np.ndarray, *, model: str) -> None:
     axes[0].set_xlim(-0.5, _SIM_TOTAL_GOALS_MAX + 0.5)
     axes[0].set_xticks(range(0, _SIM_TOTAL_GOALS_MAX + 1))
 
-    # Goal difference is an integer — integer-aligned bins + integer ticks (no 2.5).
+    # Goal difference is integer-valued; bins and ticks stay on whole numbers.
     axes[1].hist(
         gd,
         bins=np.arange(_SIM_GD_MIN - 0.5, _SIM_GD_MAX + 1.5, 1.0),
@@ -526,7 +526,7 @@ def run_induction(
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="Induce market probabilities from scorelines (Plan 07)")
+    parser = argparse.ArgumentParser(description="Derive market probs from scoreline matrices")
     parser.add_argument("--model", required=True, help="Model name or 'all'")
     parser.add_argument("--mc-samples", type=int, default=None, help="MC samples for target-match visuals")
     args = parser.parse_args(argv)

@@ -1,4 +1,4 @@
-"""Feature engineering tests (Plan 04)."""
+"""Tests that features never peek past kickoff."""
 
 from __future__ import annotations
 

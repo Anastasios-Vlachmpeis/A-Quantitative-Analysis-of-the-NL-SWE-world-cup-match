@@ -1,4 +1,4 @@
-"""Market benchmark: de-vigged closing odds as a model (Plan 05)."""
+"""Treat de-vigged closing 1X2 odds as a model (the benchmark to beat)."""
 
 from __future__ import annotations
 
@@ -53,11 +53,10 @@ def _match_market_probs(
     devig_method: DevigMethod,
     bookmaker: str | None,
 ) -> np.ndarray | None:
-    """Consensus de-vigged 1X2 probabilities for one match.
+    """De-vigged 1X2 consensus for one match.
 
-    Uses the requested bookmaker's closing line when present; otherwise the
-    median of per-book de-vigged probabilities across all books with a complete
-    1X2 quote (a robust market consensus that doesn't depend on one book key).
+    Named book's close if I have it; otherwise median across every book with a
+    complete quote (so one missing Pinnacle line doesn't blank the whole row).
     """
     sub = odds[(odds["match_id"] == match_id) & (odds["market"] == "1x2")]
     if sub.empty:
@@ -67,8 +66,8 @@ def _match_market_probs(
     if bookmaker is not None:
         book_sub = sub[sub["bookmaker"] == bookmaker]
         if not book_sub.empty:
-            sub = book_sub  # requested book available; use it
-        # otherwise fall through to consensus across all available books
+            sub = book_sub  # use the book you asked for
+        # else: median across all books with a full quote
 
     book_probs: list[np.ndarray] = []
     for _, group in sub.groupby("bookmaker", sort=True):
@@ -95,11 +94,10 @@ def _match_market_probs(
 
 
 class MarketModel(BaseModel):
-    """De-vigged closing 1X2 odds as MatchPrediction — the benchmark to beat.
+    """De-vigged closing 1X2 odds packaged as a MatchPrediction.
 
-    With a bookmaker set, uses that book's closing line when available; otherwise
-    (or if that book is absent for a match) uses the median consensus across all
-    books with a complete 1X2 quote.
+    If you name a bookmaker I use their close when it's there; otherwise I fall
+    back to the median across every book with a full 1X2 quote for that match.
     """
 
     name = "market"
@@ -116,7 +114,7 @@ class MarketModel(BaseModel):
         self.bookmaker = bookmaker
 
     def fit(self, train: pd.DataFrame) -> None:
-        """No training; market probabilities come from odds only."""
+        """Market probabilities come straight from odds; nothing to fit."""
 
     def predict(self, match: pd.Series) -> MatchPrediction:
         match_id = str(match["match_id"])

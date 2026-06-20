@@ -1,4 +1,4 @@
-"""Leakage-safe feature table builder (Plan 04)."""
+"""Build the feature table without using anything that happens after kickoff."""
 
 from __future__ import annotations
 
@@ -152,7 +152,7 @@ def features_for_match(
     *,
     form_windows: list[int],
 ) -> dict[str, Any]:
-    """Compute leakage-safe features for one match using only pre-kickoff data."""
+    """One match's features from history strictly before its kickoff."""
     kickoff = pd.Timestamp(match_row["date_utc"]).tz_convert("UTC")
     neutral = bool(match_row["neutral"])
     is_home = not neutral
@@ -315,7 +315,7 @@ def build_features(
     form_windows: list[int] | None = None,
     corpus: str = CORPUS_INTERNATIONAL,
 ) -> pd.DataFrame:
-    """Build feature rows incrementally (O(n)) for the chosen corpus."""
+    """Batch feature table in chronological order (O(n), no post-kickoff leakage)."""
     form_windows = form_windows or [5, 10]
     max_k = max(form_windows)
     subset = matches[matches["corpus"] == corpus].sort_values(
@@ -572,7 +572,7 @@ def run_build(cfg: AppConfig | None = None) -> pd.DataFrame:
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="Build leakage-safe features (Plan 04)")
+    parser = argparse.ArgumentParser(description="Build the leakage-safe feature table")
     parser.parse_args(argv)
     get_config.cache_clear()
     cfg = load_config()

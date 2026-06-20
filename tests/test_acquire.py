@@ -1,4 +1,4 @@
-"""Acquisition tests (Plan 02)."""
+"""Raw download and manifest tests."""
 
 from __future__ import annotations
 

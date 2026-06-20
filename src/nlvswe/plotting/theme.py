@@ -1,4 +1,4 @@
-"""Modern Terminal plot theme (bg/text swapped from the dark spec)."""
+"""Light plot theme (dark spec with bg/text swapped for readability)."""
 
 from __future__ import annotations
 

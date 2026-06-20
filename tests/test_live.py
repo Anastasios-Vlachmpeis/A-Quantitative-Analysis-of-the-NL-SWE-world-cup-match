@@ -1,4 +1,4 @@
-"""Live application tests."""
+"""Pre-match live pipeline tests."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Build a pre-match bet slip for a single live match."""
+"""Turn model probs into a single-match bet slip (or a no-bet row with a reason)."""
 
 from __future__ import annotations
 
@@ -18,10 +18,9 @@ CORPUS_INTERNATIONAL = "international"
 def _latest_prematch_odds(odds: pd.DataFrame, match_id: str, kickoff: pd.Timestamp) -> pd.DataFrame:
     """Latest pre-kickoff quote per bookmaker/market/selection.
 
-    Note: we deliberately do NOT filter on is_closing. The live bet is placed at the
-    latest quote available strictly before kickoff; that snapshot is often flagged
-    is_closing=True (it IS the last line before kickoff). CLV is computed separately
-    against the true closing snapshot.
+    I skip is_closing on purpose. The live bet uses whatever was quoted last before
+    kickoff, which is often tagged is_closing=True (because it literally is). CLV
+    gets the true closing snapshot elsewhere.
     """
     sub = odds[
         (odds["match_id"].astype(str) == str(match_id))
@@ -63,7 +62,7 @@ def build_live_bet_slip(
     kickoff: pd.Timestamp,
     captured_at: pd.Timestamp | None = None,
 ) -> pd.DataFrame:
-    """Evaluate +EV selections for one match; returns bet rows or a single no-bet row."""
+    """Evaluate +EV lines for one match; returns bet rows or an honest no-bet row."""
     bankroll = float(cfg.betting.bankroll)
     allowed = {b.lower() for b in cfg.betting.bookmakers}
     kickoff = pd.Timestamp(kickoff).tz_convert("UTC")

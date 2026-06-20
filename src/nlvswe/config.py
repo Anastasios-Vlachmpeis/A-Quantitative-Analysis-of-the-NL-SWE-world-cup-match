@@ -1,4 +1,4 @@
-"""Config loading and validation (pydantic)."""
+"""Load and validate config.yaml (pydantic)."""
 
 from __future__ import annotations
 

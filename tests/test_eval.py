@@ -1,4 +1,4 @@
-"""Evaluation harness tests (Plan 05)."""
+"""Walk-forward eval harness tests."""
 
 from __future__ import annotations
 

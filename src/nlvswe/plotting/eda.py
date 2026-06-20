@@ -266,7 +266,7 @@ def run_all_eda() -> None:
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="Regenerate EDA figures")
+    parser = argparse.ArgumentParser(description="Regenerate interim EDA figures")
     parser.parse_args(argv)
     get_config.cache_clear()
     cfg = load_config()

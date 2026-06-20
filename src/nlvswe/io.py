@@ -155,7 +155,7 @@ def write_raw_artifact(
     captured_at: str | None = None,
     extra: dict[str, Any] | None = None,
 ) -> Path:
-    """Write immutable raw bytes + manifest sidecar (Plan 02 contract)."""
+    """Write raw bytes and a manifest sidecar (immutable acquisition contract)."""
     dest_path = Path(dest_path)
     dest_path.parent.mkdir(parents=True, exist_ok=True)
     dest_path.write_bytes(content)

@@ -1,4 +1,4 @@
-"""Model comparison, leaderboard, and selection (Plan 08)."""
+"""Compare models on one match set, build ensembles, record which one I'd carry forward."""
 
 from __future__ import annotations
 
@@ -40,7 +40,7 @@ REPORTS = "reports"
 
 
 def discover_prediction_models() -> list[str]:
-    """Find models with predictions_<name>.parquet on disk."""
+    """Models that already have predictions_<name>.parquet on disk."""
     root = project_root() / "data" / PROCESSED
     if not root.exists():
         return []
@@ -70,7 +70,7 @@ def load_all_predictions(model_names: list[str] | None = None) -> dict[str, pd.D
 
 
 def common_match_ids(frames: dict[str, pd.DataFrame]) -> list[str]:
-    """Intersection of match_ids across all loaded models."""
+    """Match IDs every loaded model scored (intersection, not union)."""
     if not frames:
         return []
     sets = [set(df["match_id"].astype(str)) for df in frames.values()]
@@ -79,7 +79,7 @@ def common_match_ids(frames: dict[str, pd.DataFrame]) -> list[str]:
 
 
 def align_predictions(frames: dict[str, pd.DataFrame], match_ids: list[str]) -> pd.DataFrame:
-    """Stack predictions on identical match set."""
+    """Stack every model on the same match_ids for apples-to-apples scoring."""
     parts: list[pd.DataFrame] = []
     for name, df in frames.items():
         sub = df[df["match_id"].astype(str).isin(match_ids)].copy()
@@ -105,7 +105,7 @@ def build_leaderboard(
     bootstrap_samples: int = 2000,
     seed: int = 0,
 ) -> pd.DataFrame:
-    """Leaderboard with RPS/logloss/brier CIs, ranks, and accuracy footnote."""
+    """RPS, log loss, Brier with bootstrap CIs; accuracy is a footnote only."""
     scores = score_predictions(preds, bootstrap_samples=bootstrap_samples, seed=seed)
     if scores.empty:
         return scores
@@ -139,7 +139,7 @@ def pairwise_vs_reference(
     bootstrap_samples: int = 2000,
     seed: int = 0,
 ) -> pd.DataFrame:
-    """Bootstrap CI of (model - reference) mean score; negative => model better."""
+    """Bootstrap CI on (model minus reference); negative means the model wins."""
     ref = preds[preds["model"] == reference][["match_id", "p_home", "p_draw", "p_away", "outcome"]].copy()
     if ref.empty:
         return pd.DataFrame()
@@ -193,7 +193,7 @@ def build_ensembles(
     min_history_matches: int = 100,
     refit_every: int = 200,
 ) -> dict[str, pd.DataFrame]:
-    """Build simple-average and walk-forward weighted ensemble predictions."""
+    """Simple average plus walk-forward weighted blend of member models."""
     members = ensemble_members_available(member_frames)
     if len(members) < 2:
         return {}
@@ -298,7 +298,7 @@ def select_model(
     *,
     max_ece: float = 0.05,
 ) -> dict:
-    """Pick best walk-forward RPS model with honest market comparison."""
+    """Pick lowest walk-forward RPS, but say honestly if the market still wins."""
     rps = leaderboard[leaderboard["metric"] == "rps"].sort_values("mean", kind="mergesort")
     if rps.empty:
         return {"pick": None, "reason": "no scores"}
@@ -478,7 +478,7 @@ def run_compare(cfg: AppConfig | None = None) -> tuple[pd.DataFrame, pd.DataFram
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="Model comparison and selection (Plan 08)")
+    parser = argparse.ArgumentParser(description="Score models, build ensembles, write MODEL_SELECTION.md")
     parser.parse_args(argv)
     get_config.cache_clear()
     cfg = load_config()

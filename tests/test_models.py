@@ -1,4 +1,4 @@
-"""Model ladder tests (Plan 06)."""
+"""Model ladder fit/predict tests."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Pandera schemas for canonical and feature tables."""
+"""Pandera schemas for interim tables, features, and live artifacts."""
 
 from __future__ import annotations
 

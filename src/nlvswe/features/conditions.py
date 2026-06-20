@@ -1,4 +1,4 @@
-"""Venue conditions and travel proxies for feature engineering (Plan 04)."""
+"""Venue, weather, and travel distance proxies for the feature table."""
 
 from __future__ import annotations
 

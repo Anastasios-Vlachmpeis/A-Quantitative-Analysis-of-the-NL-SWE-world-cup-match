@@ -1,4 +1,4 @@
-"""Foundation tests (Plan 01)."""
+"""Tests for parquet IO, config, and the prediction contract."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Evaluation report: scores + calibration figures (Plan 05)."""
+"""Write eval scores to disk and save calibration figures."""
 
 from __future__ import annotations
 

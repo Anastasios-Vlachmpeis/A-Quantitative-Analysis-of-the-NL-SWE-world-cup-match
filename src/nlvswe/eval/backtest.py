@@ -1,4 +1,4 @@
-"""Walk-forward cross-validation engine (Plan 05)."""
+"""Walk-forward backtest: each match is predicted using only prior history."""
 
 from __future__ import annotations
 
@@ -154,7 +154,7 @@ def run_backtest(model_name: str, cfg: AppConfig | None = None) -> pd.DataFrame:
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="Walk-forward backtest (Plan 05)")
+    parser = argparse.ArgumentParser(description="Walk-forward backtest for one model")
     parser.add_argument("--model", required=True, help=f"Model name: {', '.join(sorted(MODEL_FACTORIES))}")
     args = parser.parse_args(argv)
 

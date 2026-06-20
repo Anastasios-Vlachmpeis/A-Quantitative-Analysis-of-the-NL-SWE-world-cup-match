@@ -1,4 +1,4 @@
-"""Betting strategy backtest CLI and orchestration."""
+"""Run the betting backtest on club odds (machinery validation, not intl profit claims)."""
 
 from __future__ import annotations
 
@@ -235,8 +235,8 @@ def build_bet_candidates(
         .tail(1)
         .rename(columns={"decimal_odds": "odds_closing"})
     )
-    # Pre-index closing odds for O(1) lookup; a per-bet DataFrame scan over this
-    # (~141k-row) table was the backtest's O(N_bets x N_closing) bottleneck.
+    # Pre-index closing odds so CLV lookup stays O(1). Scanning the full ~141k-row
+    # table per bet was the backtest bottleneck (O(bets x closing rows)).
     closing_map: dict[tuple[str, str, str], float] = {
         (str(r.match_id), str(r.bookmaker), str(r.selection).lower()): float(r.odds_closing)
         for r in closing_latest.itertuples(index=False)
@@ -579,7 +579,7 @@ def run_all(cfg: AppConfig | None = None, models: list[str] | None = None) -> li
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="Betting strategy backtest")
+    parser = argparse.ArgumentParser(description="Club-corpus +EV backtest (machinery check, not a profit claim)")
     parser.add_argument("--model", required=True, help="Model name or 'all'")
     args = parser.parse_args(argv)
 

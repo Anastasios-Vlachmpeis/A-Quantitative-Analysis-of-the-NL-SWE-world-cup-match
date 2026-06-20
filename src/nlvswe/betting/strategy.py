@@ -1,4 +1,4 @@
-"""EV gating, Kelly sizing, and bet settlement."""
+"""EV gate, Kelly sizing, settlement for backtest and live slips."""
 
 from __future__ import annotations
 

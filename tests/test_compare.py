@@ -1,4 +1,4 @@
-"""Model comparison tests (Plan 08)."""
+"""Leaderboard and ensemble comparison tests."""
 
 from __future__ import annotations
 

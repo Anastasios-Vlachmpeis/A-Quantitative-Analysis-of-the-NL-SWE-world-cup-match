@@ -1,4 +1,4 @@
-"""Closing Line Value (CLV) metrics."""
+"""Closing-line value: did I beat the market's final price?"""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Calibration diagnostics for 1X2 predictions (Plan 05)."""
+"""Reliability bins and calibration error for 1X2 probabilities."""
 
 from __future__ import annotations
 

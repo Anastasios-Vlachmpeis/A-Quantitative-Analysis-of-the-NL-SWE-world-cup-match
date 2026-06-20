@@ -1,4 +1,4 @@
-"""Live pre-match prediction, bet slip, and optional freeze."""
+"""One-shot pre-match pipeline for NL vs SWE: features, prediction, slip, optional git freeze."""
 
 from __future__ import annotations
 
@@ -68,7 +68,7 @@ def resolve_target_match(matches: pd.DataFrame, cfg: AppConfig) -> pd.Series:
 
 
 def refresh_live_inputs(cfg: AppConfig) -> None:
-    """Refresh time-sensitive raw inputs (FIFA ranking, results, live odds snapshots)."""
+    """Refresh FIFA, results, and live odds snapshots before I lock the pre-match call."""
     try:
         from nlvswe.data import acquire, clean
     except ImportError as exc:
@@ -90,7 +90,7 @@ def refresh_live_inputs(cfg: AppConfig) -> None:
 
 
 def build_live_features_row(cfg: AppConfig) -> tuple[pd.DataFrame, pd.Series]:
-    """Build live feature row via features_for_match (same path as backtest)."""
+    """Same features_for_match path as the backtest, then sanity-check against the batch table."""
     matches = read_table("matches", INTERIM)
     ratings = read_table("ratings", INTERIM)
     conditions = read_table("conditions", INTERIM)
@@ -157,7 +157,7 @@ def predict_ensemble_weighted(
     train: pd.DataFrame,
     odds: pd.DataFrame,
 ) -> MatchPrediction:
-    """Fit members on full pre-kickoff history; blend with inverse-RPS weights."""
+    """Fit each member on pre-kickoff history, blend with inverse-RPS weights from walk-forward preds."""
     member_frames = _load_member_prediction_frames()
     members = ensemble_members_available(member_frames)
     if len(members) < 2:
@@ -345,7 +345,7 @@ def write_prediction_md(
 
 
 def create_prematch_freeze(cfg: AppConfig, *, message: str | None = None) -> str:
-    """Commit live artifacts and create the prematch-freeze tag."""
+    """Commit live artifacts and tag prematch-freeze (only run this before kickoff)."""
     root = project_root()
     msg = message or f"Pre-match freeze: {cfg.target_match.home} vs {cfg.target_match.away}"
     paths = [
@@ -469,10 +469,10 @@ def run_live_predict(
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="Live pre-match prediction and freeze")
-    parser.add_argument("--model", default=None, help="Model name (default: from MODEL_SELECTION.md)")
-    parser.add_argument("--refresh", action="store_true", help="Refresh raw/interim data before predict")
-    parser.add_argument("--freeze", action="store_true", help="Git commit + tag prematch-freeze after run")
+    parser = argparse.ArgumentParser(description="Pre-match prediction for NL vs SWE, optional git freeze")
+    parser.add_argument("--model", default=None, help="Model (default: read from MODEL_SELECTION.md)")
+    parser.add_argument("--refresh", action="store_true", help="Re-fetch raw data and rebuild interim tables")
+    parser.add_argument("--freeze", action="store_true", help="Commit artifacts and tag prematch-freeze")
     args = parser.parse_args(argv)
 
     get_config.cache_clear()

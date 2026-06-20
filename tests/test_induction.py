@@ -1,4 +1,4 @@
-"""Probability induction tests (Plan 07)."""
+"""Scoreline-to-market induction tests."""
 
 from __future__ import annotations
 

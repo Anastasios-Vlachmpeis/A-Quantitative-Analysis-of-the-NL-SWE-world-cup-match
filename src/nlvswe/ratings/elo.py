@@ -1,13 +1,8 @@
-"""Rolling Elo ratings over match history (shared by Plan 03, 04, 06).
+"""Chronological Elo over international results (used when cleaning and featurizing).
 
-Parameters (international football defaults):
-- INITIAL_ELO: 1500.0 for unseen teams
-- K_FACTOR: 20.0 (FIFA-scale)
-- HOME_ADVANTAGE: 100.0 Elo points added to home side expectation
-- GOAL_MARGIN_MULTIPLIER: standard ln-margin adjustment
-
-Ratings are computed chronologically; each match updates both teams. Emitted
-rating rows use rating_date = match kickoff (UTC), leakage-safe by construction.
+Defaults: 1500 for unseen teams, K=20, +100 home advantage in expectation,
+ln-margin multiplier on updates. Each row is dated at kickoff so you can't
+accidentally leak the score.
 """
 
 from __future__ import annotations

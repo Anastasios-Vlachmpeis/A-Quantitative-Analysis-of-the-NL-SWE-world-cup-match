@@ -1,7 +1,7 @@
-"""Point-in-time Elo pre-match ratings (Plan 04; shared with Plan 06 EloModel).
+"""Pre-kickoff Elo for home and away, shared with the Elo goal model.
 
-Computes each team's Elo strictly BEFORE kickoff by rolling forward over prior
-completed matches. Post-match updates match nlvswe.ratings.elo parameters.
+Each team's rating uses only matches strictly before that kickoff. Post-match
+updates follow the same rules as nlvswe.ratings.elo.
 """
 
 from __future__ import annotations

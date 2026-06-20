@@ -1,4 +1,4 @@
-"""Cleaning tests (Plan 03)."""
+"""Interim table cleaning tests."""
 
 from __future__ import annotations
 

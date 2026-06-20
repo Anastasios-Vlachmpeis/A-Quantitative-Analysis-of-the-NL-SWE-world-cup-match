@@ -1,1 +1,1 @@
-"""Feature engineering (Plan 04)."""
+"""Point-in-time features for international matches."""

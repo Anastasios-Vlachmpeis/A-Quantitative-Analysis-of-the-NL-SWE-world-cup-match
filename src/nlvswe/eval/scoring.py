@@ -1,4 +1,4 @@
-"""Proper scoring rules for 1X2 predictions (Plan 05)."""
+"""RPS, log loss, and Brier for 1X2 predictions. Lower is better on all of them."""
 
 from __future__ import annotations
 
