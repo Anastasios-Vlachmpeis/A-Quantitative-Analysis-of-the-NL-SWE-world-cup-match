@@ -51,13 +51,13 @@ from the result and from **CLV** (did 1.74 beat the closing line?).
 **Why this is flagged, not trusted.** The model screams +21% EV here, but our own
 market comparison shows the goal models **systematically over-predict goals**:
 model P(over 2.5) = **71%** vs the 15-book sharp consensus of **~56%** (~+0.8 goals).
-That gap is a **calibration artifact**, not edge — pooled Poisson models over-apply
+That gap is a **calibration artifact**, not edge. Pooled Poisson models over-apply
 the "favourite scores a lot" pattern (learned from lopsided qualifiers) to a tight
 tournament match. By our value criterion this bet would be **excluded** (and our
 config disables totals markets for exactly this reason).
 
 **Why it's here anyway.** Placed as a small, clearly-labelled **speculative** stake
-at user discretion — a live test of the raw scoreline model's goal view. It is *not*
+at user discretion ~ a live test of the raw scoreline model's goal view. It is *not*
 part of the value strategy and should be read in the report as "the model's biased
 call, placed deliberately so we can see the bias play out." If prioritising pure
 discipline, **skip this bet.**
@@ -68,7 +68,7 @@ discipline, **skip this bet.**
 
 | Bet | Type | Stake | Odds | If it wins |
 |---|---|---|---|---|
-| Netherlands to win | Value (+9.1% EV) | $31 | 1.74 | +$54.0 |
+| Netherlands to win | Value (+9.1% EV) | $31 | 1.74 | +$22.94 |
 | Over 2.5 goals | Speculative (likely −EV) | $20 | 1.70 | +$14.0 |
 | **Total exposure** | | **$51** (5.1% of bankroll) | | |
 
