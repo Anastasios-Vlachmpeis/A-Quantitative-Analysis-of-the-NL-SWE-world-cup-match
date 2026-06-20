@@ -1,4 +1,4 @@
-# Pre-match prediction — Netherlands vs Sweden
+# Pre-match prediction ~ Netherlands vs Sweden
 
 **Generated (UTC):** 2026-06-20T16:47:31.212938+00:00
 **Git commit:** `b399a33`
