@@ -102,6 +102,9 @@ betting:
   flat_stake_control: true    # also run a flat-stake variant as a control
   bookmakers: ["pinnacle", "bet365", "williamhill"]  # adjust to what's available
   markets:
-    totals_lines: [0.5, 1.5, 2.5, 3.5, 4.5]
-    ah_lines: [-1.0, -0.5, 0.0, 0.5, 1.0]
+    # Totals/AH disabled for the live bet: the goal models over-predict goals
+    # (model P(over 2.5)=0.71 vs market ~0.55), so totals "edges" are artifacts.
+    # Restrict to 1X2 where the model's disagreement with the market is defensible.
+    totals_lines: []
+    ah_lines: []
     correct_score_top_n: 10   # top-N exact scores + an "other" bucket

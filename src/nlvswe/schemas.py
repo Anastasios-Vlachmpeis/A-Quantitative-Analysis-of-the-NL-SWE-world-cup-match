@@ -286,6 +286,44 @@ BANKROLL_SIM_SCHEMA = pa.DataFrameSchema(
     name="bankroll_sim",
 )
 
+LIVE_PREDICTIONS_SCHEMA = pa.DataFrameSchema(
+    {
+        "match_id": pa.Column(str, nullable=False),
+        "model": pa.Column(str, nullable=False),
+        "date_utc": pa.Column("datetime64[ns, UTC]", nullable=False),
+        "p_home": pa.Column(float, Check.in_range(0.0, 1.0), nullable=False),
+        "p_draw": pa.Column(float, Check.in_range(0.0, 1.0), nullable=False),
+        "p_away": pa.Column(float, Check.in_range(0.0, 1.0), nullable=False),
+        "has_scoreline": pa.Column(bool, nullable=False),
+        "scoreline_flat": pa.Column(object, nullable=True, required=False),
+    },
+    strict=True,
+    name="live_predictions",
+)
+
+BET_SLIP_SCHEMA = pa.DataFrameSchema(
+    {
+        "match_id": pa.Column(str, nullable=False),
+        "model": pa.Column(str, nullable=False),
+        "captured_at": pa.Column("datetime64[ns, UTC]", nullable=False),
+        "kickoff_utc": pa.Column("datetime64[ns, UTC]", nullable=False),
+        "bookmaker": pa.Column(str, nullable=True, required=False),
+        "market": pa.Column(str, nullable=True, required=False),
+        "selection": pa.Column(str, nullable=True, required=False),
+        "model_prob": pa.Column(float, Check.in_range(0.0, 1.0), nullable=True, required=False),
+        "book_prob_devig": pa.Column(float, Check.in_range(0.0, 1.0), nullable=True, required=False),
+        "edge": pa.Column(float, nullable=True, required=False),
+        "ev": pa.Column(float, nullable=True, required=False),
+        "odds_taken": pa.Column(float, nullable=True, required=False),
+        "stake_method": pa.Column(str, Check.isin(["kelly", "flat"]), nullable=False),
+        "stake": pa.Column(float, Check.ge(0.0), nullable=False),
+        "status": pa.Column(str, Check.isin(["bet", "no_bet"]), nullable=False),
+        "rationale": pa.Column(str, nullable=False),
+    },
+    strict=True,
+    name="bet_slip",
+)
+
 CANONICAL_SCHEMAS: dict[str, pa.DataFrameSchema] = {
     "teams": TEAMS_SCHEMA,
     "venues": VENUES_SCHEMA,
@@ -302,6 +340,8 @@ CANONICAL_SCHEMAS: dict[str, pa.DataFrameSchema] = {
     "pairwise_vs_market": PAIRWISE_SCHEMA,
     "bets": BETS_SCHEMA,
     "bankroll_sim": BANKROLL_SIM_SCHEMA,
+    "live_predictions": LIVE_PREDICTIONS_SCHEMA,
+    "bet_slip": BET_SLIP_SCHEMA,
 }
 
 for _name, _schema in CANONICAL_SCHEMAS.items():

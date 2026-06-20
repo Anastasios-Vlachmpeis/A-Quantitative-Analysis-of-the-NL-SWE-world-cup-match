@@ -1,131 +1,154 @@
-# A Quantitative Analysis of the NL vs SWE match + Betting Strategy
+# A Quantitative Analysis of Netherlands vs Sweden + Betting Strategy
 
-Quantitative research project predicting the **FIFA World Cup 2026** match
-**Netherlands vs Sweden**, pricing betting markets against bookmaker odds, and
-recommending a staking strategy (based on 'mock' $1000 account)
+A quantitative-research project that predicts the **FIFA World Cup 2026** match
+**Netherlands vs Sweden**, prices betting markets against bookmaker odds, and
+recommends a staking strategy on a **mock $1,000 bankroll** — built and frozen
+*before kickoff* as a pre-registered, market-anchored exercise.
 
-## Framing
+---
 
-- The single match is **N=1** — it cannot validate a model. Statistical evidence
-  comes from a **walk-forward backtest** over historical matches.
-- The live match is a **pre-registered showcase**: predictions and bets are frozen
-  (git-tagged `prematch-freeze`) before kickoff.
-- **Closing Line Value (CLV)** is the headline KPI for betting, not one-bet profit.
+## The thesis (read this first)
 
-## Setup
+A single match is **N = 1**: its result can neither confirm nor refute a model.
+So the project is deliberately built so that:
 
-Requires **Python 3.11+**.
+1. **The evidence is the backtest, not the bet.** Models are judged by a
+   **walk-forward** backtest over ~19,700 international matches using proper
+   scoring rules (RPS / log-loss / Brier) with bootstrap confidence intervals.
+2. **The live match is a pre-registered showcase.** Predictions and bets are
+   frozen and git-tagged (`prematch-freeze`) before kickoff — no hindsight.
+3. **The market is the benchmark.** The sharp, de-vigged bookmaker line is the
+   thing to beat. **Closing Line Value (CLV)** — not one-match profit — is the
+   honest measure of skill.
+
+The point of the whole pipeline is to *earn the right* to trust our probability
+over the bookmaker's on the one bet we actually place.
+
+---
+
+## Headline results
+
+**Model quality (walk-forward RPS, lower is better; 19,500-match common set):**
+
+| Model | RPS | 95% CI |
+|---|---|---|
+| ensemble_weighted | **0.179** | [0.177, 0.181] |
+| ensemble_avg | 0.180 | [0.178, 0.181] |
+| poisson | 0.181 | [0.178, 0.183] |
+| dixon_coles | 0.181 | [0.178, 0.183] |
+| elo | 0.186 | [0.184, 0.188] |
+| baseline (base rates) | 0.226 | [0.224, 0.227] |
+
+The goal models and ensembles **decisively beat the base-rate baseline** and
+edge out Elo — but the **top four are statistically tied** (overlapping CIs), so
+we frame them as a cluster, not a clear winner.
+
+**Did we beat the market?** On internationals it's untestable — there is no
+historical international closing-odds data — so "beat the market" is a **live,
+N=1 question** answered only by the NL–SWE bet's CLV. (Honest by construction.)
+
+**A bias we found and quantified.** Comparing the model to the live market
+exposed a real flaw: the goal models **over-predict goals** — model
+P(over 2.5) = **71%** vs the sharp consensus **~56%**. We traced it to pooled
+Poisson models over-applying the "favourite scores a lot" pattern, restricted the
+live bet to **1X2 only**, and documented the rest. Catching your own model's bias
+against the market is the project's most important result.
+
+---
+
+## The bet (pre-registered)
+
+See **[`reports/BETS.md`](reports/BETS.md)** and **`reports/PREDICTION.md`**.
+
+- **Value bet — Netherlands to win** @ 1.74: model 62.7% vs market 55.6% →
+  **+9.1% EV**, ¼-Kelly stake $31. (+127 Elo edge, neutral venue.)
+- **Speculative — Over 2.5** @ 1.70: the model loves it (+21% claimed EV) but our
+  own analysis flags it as a likely **−EV goal-volume artifact**; placed small and
+  clearly labelled, *not* as a value bet.
+
+Why not bet all three outcomes? You mathematically **cannot** be +EV on all of
+1/X/2 at one bookmaker (your probs sum to 1; their vigged probs sum to >1). Value
+comes from betting *only* the side the market under-prices — here, the home win.
+
+---
+
+## How it works (pipeline)
+
+Each phase reads versioned artifacts from disk and writes new ones (with manifest
+sidecars for reproducibility). Build order and detail live in `plans/`.
+
+| Phase | What it does | Key output |
+|---|---|---|
+| 01 Foundation | config, IO+manifests, seeding, schemas | package skeleton |
+| 02 Acquisition | results, FIFA/Elo, **club + live odds**, venues | `data/raw/*` |
+| 03 Cleaning | canonical tables, entity resolution, `corpus` split | `data/interim/*` |
+| 04 Features | point-in-time, **leakage-safe** features (self-computed Elo) | `features.parquet` |
+| 05 Harness | RPS/log-loss/Brier, calibration, walk-forward CV, de-vig | `eval/*` |
+| 06 Models | ladder: baseline→Elo→Poisson→Dixon-Coles→bivariate→Bayesian→ML | `predictions_*` |
+| 07 Induction | scoreline → all markets (analytic + Monte Carlo) | `market_probs_*` |
+| 08 Comparison | leaderboard + ensembles + honest selection | `MODEL_SELECTION.md` |
+| 09 Strategy | EV / fractional Kelly / bankroll MC / CLV (club corpus) | `bets_*`, `bankroll_sim_*` |
+| 10 Live | the NL–SWE call + bet slip, frozen pre-kickoff | `data/processed/live/*` |
+| 11 Post-match | settle, CLV, P&L, report | `reports/*` |
+
+**Hybrid corpus decision:** goal models are fit/evaluated on **internationals
+only**; the EV/Kelly/CLV *machinery* is validated on a large **club-league** odds
+sample (the two are never pooled). This is why model quality and betting mechanics
+are reported on separate corpora — stated openly as a limitation.
+
+---
+
+## Limitations (stated honestly)
+
+- **N = 1** live match — the bet illustrates, the backtest is the evidence.
+- **Goal-volume bias** — goal models over-predict totals; live bet limited to 1X2.
+- **No historical international odds** — "beat the market" is only the live N=1 test.
+- **FIFA ratings end ~Sep 2024** — stale for the live match; the goal models rely
+  on self-computed Elo (current) instead, and FIFA is treated cautiously.
+- **Backtest approximations** — walk-forward refits every N matches for tractability
+  (disclosed; immaterial over a 20-year history).
+
+---
+
+## Setup & reproduction
+
+Requires **Python 3.11+** (3.12 recommended).
 
 ```bash
 python -m venv .venv
-.venv\Scripts\activate          # Windows
-# source .venv/bin/activate     # macOS/Linux
+.venv\Scripts\activate            # Windows  (source .venv/bin/activate on *nix)
 pip install -e .
 ```
 
-## Quick check
+Run the pipeline in order (each step has tests):
 
 ```bash
-python -m nlvswe._dummy
-pytest tests/test_foundation.py
-```
-
-The dummy run writes `data/processed/dummy.parquet` and a manifest sidecar,
-proving the artifact pipeline works.
-
-## Data acquisition
-
-Pull raw sources into `data/raw/` (gitignored). Each file gets a manifest sidecar.
-
-```bash
-# Individual sources
-python -m nlvswe.data.acquire --source results
-python -m nlvswe.data.acquire --source odds_history
-
-# All sources (requires ODDS_API_KEY env var for live odds)
-set ODDS_API_KEY=your_key_here   # Windows; never commit this
-python -m nlvswe.data.acquire --source all
-
-pytest tests/test_acquire.py
-```
-
-See `data/raw/SOURCES.md` for coverage notes from the validation spike.
-
-## Cleaning
-
-Build canonical interim tables from raw data:
-
-```bash
+python -m nlvswe.data.acquire --source all     # needs ODDS_API_KEY in env / .env
 python -m nlvswe.data.clean --table all
-pytest tests/test_clean.py
-```
-
-Outputs land in `data/interim/` with manifests; see `data/interim/VALIDATION.md`.
-
-## Feature engineering
-
-Build point-in-time, leakage-safe features for international matches:
-
-```bash
 python -m nlvswe.features.build
-pytest tests/test_features.py
-```
-
-Outputs: `data/processed/features.parquet`, `data/processed/FEATURES.md`, `reports/figures/eda_feat_*`.
-
-## Evaluation harness
-
-Shared scoring, calibration, walk-forward CV, and market benchmark:
-
-```bash
-python -m nlvswe.eval.backtest --model constant
-pytest tests/test_eval.py
-```
-
-Outputs: `data/processed/predictions_<model>.parquet`, `data/processed/eval_scores.parquet`, `reports/figures/calibration_*.png`.
-
-## Models
-
-International-only model ladder with walk-forward backtest:
-
-```bash
-python -m nlvswe.models.run --model baseline
-python -m nlvswe.models.run --model all
-pytest tests/test_models.py
-```
-
-See `models/MODELS.md` for assumptions and limitations. Outputs: `data/processed/predictions_<model>.parquet`.
-
-## Probability induction
-
-Turn scoreline distributions into betting market probabilities:
-
-```bash
-python -m nlvswe.betting.induction --model poisson
+python -m nlvswe.models.run --model all        # --refit-every 100 for speed
 python -m nlvswe.betting.induction --model all
-pytest tests/test_induction.py
-```
-
-Outputs: `data/processed/market_probs_<model>.parquet`, `reports/figures/induction_*`.
-
-## Model comparison
-
-Compare all models on a common walk-forward match set, build ensembles, and record selection:
-
-```bash
 python -m nlvswe.eval.compare
-pytest tests/test_compare.py
+python -m nlvswe.live.predict                  # add --refresh --freeze before kickoff
+pytest                                          # full test suite
 ```
 
-Outputs: `data/processed/leaderboard.parquet`, `data/processed/predictions_ensemble_*.parquet`, `reports/MODEL_SELECTION.md`, `reports/figures/compare_*`.
+**The freeze:** set `scope: live` in `config/config.yaml`, then
+`python -m nlvswe.live.predict --refresh --freeze` creates the `prematch-freeze`
+git tag; the commit hash is recorded in `reports/PREDICTION.md`. Nothing that feeds
+the bet may change after the tag — post-match work is append-only.
+
+---
 
 ## Layout
 
 ```
-config/config.yaml     # single source of truth
-src/nlvswe/            # all logic lives here
-data/raw|interim|processed/   # artifacts (gitignored except .gitkeep)
-plans/                 # build plans (read 00-overview first)
+config/config.yaml            # single source of truth (seed, corpus, markets, bankroll)
+src/nlvswe/                    # all logic (data, features, eval, models, betting, live)
+data/raw|interim|processed/   # artifacts (gitignored; manifests track provenance)
+reports/                      # PREDICTION.md, BETS.md, MODEL_SELECTION.md, figures/
+plans/                        # phase-by-phase build specs (read 00-overview first)
+tests/                        # pytest per phase
 ```
 
-See `plans/README.txt` for the full build order (Phases 01–11).
+See `plans/README.txt` for the full build order, and `reports/` for the writeups.
